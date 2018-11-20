@@ -47,7 +47,7 @@ var Exchanger = {
 			try {
 				i = Number(i);
 				o = i * Exchanger.conversionRates.rates[Exchanger.outputCurrency];
-				document.getElementById("output-value").value = o;
+				document.getElementById("output-value").value = o.toFixed(2);
 				console.log("Updating output value to: " + o);
 			} catch(err) {
 				console.log("Error");
