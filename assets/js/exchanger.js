@@ -15,40 +15,44 @@ function loadJSON(path, success, error) {
 	xhr.send();
 }
 
-
 var Exchanger = {
 	inputCurrency: "USD",
 	outputCurrency: "JPY",
-	conversionRates: {},
 	init: function() {
 		// get conversion rates when loaded
 		Exchanger.getConversionRates();
 	},
 	getConversionRates: function() {
 		var online = navigator.onLine;
+		// try to get a new rate if online
 		if(online) {
+			console.log("user is online, retrieving rates...");
 			var apiURL = 'https://api.exchangeratesapi.io/latest?base=' + Exchanger.inputCurrency;
 			loadJSON(apiURL, function(data) {
-				Exchanger.conversionRates = data;
+				BaseRate[Exchanger.inputCurrency] = data;
 			}, function(xhr) {
 				console.log("Error");
 			});
-		} else {
-			console.log("Reconnect to the internet to get an updated rate.\nAttempting to use cached rates...");
+		}
+		// user is offline. use cache if available
+		else {
+			console.log("User is offline.\nAttempting to use cached rates...");
+			// check if in cache
+			if(BaseRate[Exchanger.inputCurrency] != undefined) {
+				console.log("Rate found in cache. Using cached rate.");
+			} else {
+				console.log("No rate in cache, can't convert. :(");
+			}
 		}
 	},
 	convert: function() {
 		setTimeout(function() {
 			var i = document.getElementById("input-value").value;
-			console.log("Input value: " + i);
-			// clear the output value
-			document.getElementById("output-value").value = "";
 
 			try {
 				i = Number(i);
-				o = i * Exchanger.conversionRates.rates[Exchanger.outputCurrency];
+				o = i * BaseRate[Exchanger.inputCurrency].rates[Exchanger.outputCurrency];
 				document.getElementById("output-value").value = o.toFixed(2);
-				console.log("Updating output value to: " + o);
 			} catch(err) {
 				console.log("Error");
 			}
@@ -56,21 +60,34 @@ var Exchanger = {
 	},
 	inputCurrencyChange: function(i) {
 		Exchanger.inputCurrency = i;
-		console.log("New input currency: " + Exchanger.inputCurrency);
 		// get rates with the new base currency
-		console.log("Getting the rates with the new base currency...");
 		Exchanger.getConversionRates();
 		// convert whatever is there
-		console.log("Re-converting existing input with new currency...");
 		Exchanger.convert();
 	},
 	outputCurrencyChange: function(o) {
 		Exchanger.outputCurrency = o;
-		console.log("New output currency: " + Exchanger.outputCurrency);
 		// convert whatever is there
-		console.log("Re-converting existing input with new currency...");
-		console.log(Exchanger.conversionRates);
 		Exchanger.convert();
+	}
+}
+
+var BaseRate = {
+	save: function() {
+		if (typeof(Storage) !== "undefined") {
+			localStorage.setItem("BaseRate", JSON.stringify(BaseRate));
+		} else {
+			console.log("Sorry, your browser does not support Web Storage...");
+		}
+	},
+	load: function() {
+		if (typeof(Storage) !== "undefined") {
+			if(localStorage.getItem("BaseRate") != null) {
+				BaseRate = JSON.parse(localStorage.getItem("BaseRate"));
+			}
+		} else {
+			console.log("Sorry, your browser does not support Web Storage...");
+		}
 	}
 }
 
