@@ -140,11 +140,11 @@ var Exchanger = {
 			if(i < Exchanger.allCurrencies.length) {
 				Exchanger.getConversionRates(Exchanger.allCurrencies[i], true);
 			} else {
-				console.log('Done caching all currencies');
+				console.log('Done pre-caching all currencies');
 				clearInterval(delayEffect);
 			}
 			i++;
-		}, 1000);
+		}, 200);
 	}
 }
 
