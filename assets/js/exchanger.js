@@ -42,10 +42,6 @@ var Exchanger = {
 		var select = document.getElementById('output-currency');
 		return select.options[select.selectedIndex].value;
 	},
-	init: function() {
-		// get the initial rate
-		Exchanger.getConversionRates();
-	},
 	getConversionRates: function() {
 		// try to get a new rate if online
 		if(isOnline()) {
@@ -83,5 +79,3 @@ var Exchanger = {
 		}, 500); // allow time to retrive the rates
 	}
 }
-
-window.onload = Exchanger.init;
