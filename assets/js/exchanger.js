@@ -55,12 +55,12 @@ var Exchanger = {
 		}
 		// user is offline. use cache if available
 		else {
-			var str = 'OFFLINE: Attempting to use cached rates...'
+			console.log('OFFLINE: Attempting to use cached rates...');
 			// check if in cache
 			if(Exchanger.Data[Exchanger.inputCurrency()] != undefined) {
-				console.log(str + 'Using cached rate.');
+				console.log('Using cached rate.');
 			} else {
-				console.log(str + 'No rate in cache, can\'t convert. :(');
+				console.log('No rate in cache, can\'t convert. :(');
 				document.getElementById('output-value').value = '';
 			}
 		}
@@ -74,8 +74,14 @@ var Exchanger = {
 				var outputAmount = inputAmount * Exchanger.Data[Exchanger.inputCurrency()].rates[Exchanger.outputCurrency()];
 				document.getElementById('output-value').value = outputAmount.toFixed(2);
 			} catch(err) {
-				console.log('Error');
+				console.log('ERROR: ' + err.message);
 			}
 		}, 500); // allow time to retrive the rates
+	},
+	saveData: function() {
+		// save Data to localStorage
+	},
+	loadData: function() {
+		// load Data from localStorage
 	}
 }
