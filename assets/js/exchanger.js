@@ -15,7 +15,7 @@ function loadJSON(path, success, error) {
 	xhr.send();
 }
 
-var isOnline = function() {
+function isOnline() {
 	return navigator.onLine;
 }
 
