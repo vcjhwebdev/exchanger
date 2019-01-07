@@ -1,3 +1,7 @@
+var isOnline = function() {
+	return navigator.onLine;
+}
+
 function loadJSON(path, success, error) {
 	var xhr = new XMLHttpRequest();
 	xhr.onreadystatechange = function() {
@@ -28,15 +32,38 @@ function hasLocalStorage() {
 	}
 }
 
+var Today = {
+	d: function() {
+		return new Date();
+	},
+	parseString: function() {
+		var year = this.d().getFullYear();
+		var month = this.d().getMonth() + 1; // January is 0, so add one
+		var date = this.d().getDate();
+
+		if( month < 10 ) {
+			month = '0' + month;
+		}
+
+		if( date < 10 ) {
+			date = '0' + date;
+		}
+
+		return year + '-' + month + '-' + date;
+	}
+};
+
 var Exchanger = {
 	Data: {},
 	inputCurrency: 'USD',
 	outputCurrency: 'JPY',
 	allCurrencies: [],
 	init: function() {
-		// get conversion rates when loaded
+		// load from localStorage
 		Exchanger.loadData();
-		Exchanger.getConversionRates('USD', false);
+		// get the rates with USD as base
+		Exchanger.getConversionRates('USD');
+		// get currency codes
     setTimeout(function(){
 			for(p in Exchanger.Data.USD.rates) {
 				Exchanger.allCurrencies.push(p);
@@ -44,32 +71,31 @@ var Exchanger = {
 			Exchanger.fillCache();
 		}, 500);
 	},
-	getConversionRates: function(i, silent) {
-		var online = navigator.onLine;
+	getConversionRates: function(i) {
 		// try to get a new rate if online
-		if(online) {
-      if(!silent) {
-				Exchanger.userMsg('Online: Retrieving rates for ' + i + '...');
-				console.log('Retrieving ' + i);
+		if(isOnline()) {
+			// no rates in cache OR cached rate is NOT from today
+			if(Exchanger.Data[i] === undefined || Exchanger.Data[i].date !== Today.parseString()) {
+				console.log('ONLINE: Retrieving rates for ' + i + '...');
+				var apiURL = 'https://api.exchangeratesapi.io/latest?base=' + i;
+				loadJSON(apiURL, function(data) {
+					Exchanger.Data[i] = data;
+					Exchanger.saveData();
+				}, function(xhr) {
+					console.log('Error');
+				});
 			} else {
-				console.log('Retrieving ' + i + ' silently');
+				console.log('Cached rate is from today. NOT retreiving new rate.');
 			}
-			var apiURL = 'https://api.exchangeratesapi.io/latest?base=' + i;
-			loadJSON(apiURL, function(data) {
-				Exchanger.Data[i] = data;
-				Exchanger.saveData();
-			}, function(xhr) {
-				console.log('Error');
-			});
 		}
 		// user is offline. use cache if available
 		else {
-			var str = 'Offline: Attempting to use cached rates...'
+			var str = 'OFFLINE: Attempting to use cached rates...'
 			// check if in cache
 			if(Exchanger.Data[Exchanger.inputCurrency] != undefined) {
-				Exchanger.userMsg(str + 'Using cached rate.');
+				console.log(str + 'Using cached rate.');
 			} else {
-				Exchanger.userMsg(str + 'No rate in cache, can\'t convert. :(');
+				console.log(str + 'No rate in cache, can\'t convert. :(');
 				document.getElementById('output-value').value = '';
 			}
 		}
@@ -89,7 +115,7 @@ var Exchanger = {
 	inputCurrencyChange: function(i) {
 		Exchanger.inputCurrency = i;
 		// get rates with the new base currency
-		Exchanger.getConversionRates(i, false);
+		Exchanger.getConversionRates(i);
 		// convert whatever is there
 		Exchanger.convert();
 	},
@@ -97,29 +123,6 @@ var Exchanger = {
 		Exchanger.outputCurrency = o;
 		// convert whatever is there
 		Exchanger.convert();
-	},
-	userMsg: function(msg) {
-		var outputDiv = document.getElementById('info');
-		var spanNode = document.createElement('P');
-		var textNode = document.createTextNode(msg);
-		spanNode.appendChild(textNode);
-		outputDiv.insertBefore(spanNode, outputDiv.childNodes[0]);
-		Exchanger.fade();
-	},
-	fade: function() {
-		var fadeTarget = document.getElementById('info').childNodes[0];
-		var counter = 1;
-		setTimeout(function() {
-			var fadeEffect = setInterval(function () {
-				if (counter > 0) {
-					counter -= 0.1
-					fadeTarget.style.opacity = counter.toFixed(1);
-				} else {
-					clearInterval(fadeEffect);
-					fadeTarget.parentNode.removeChild(fadeTarget);
-				}
-			}, 50);
-		}, 2000);
 	},
 	saveData: function() {
 		if (hasLocalStorage()) {
@@ -134,13 +137,18 @@ var Exchanger = {
 		}
 	},
 	fillCache: function() {
-		console.log(Exchanger.allCurrencies.length + ' currencies in total.');
+		console.log('Pre-caching all(' + Exchanger.allCurrencies.length + ') currencies...')
 		var i = 0;
 		var delayEffect = setInterval(function(){
 			if(i < Exchanger.allCurrencies.length) {
-				Exchanger.getConversionRates(Exchanger.allCurrencies[i], true);
+				if(isOnline()) {
+					Exchanger.getConversionRates(Exchanger.allCurrencies[i]);
+				} else {
+					console.log('OFFLINE: Skipping ' + Exchanger.allCurrencies[i]);
+				}
 			} else {
-				console.log('Done pre-caching all currencies');
+				console.log('Done!');
+				console.log(Object.keys(Exchanger.Data).length + ' currencies in cache.');
 				clearInterval(delayEffect);
 			}
 			i++;
