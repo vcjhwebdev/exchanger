@@ -17,7 +17,7 @@
 		<input type="text" id="input-value" onKeyUp="Exchanger.convert();">
 		<select name="currency"
 				id="input-currency"
-				onChange="Exchanger.inputCurrencyChange(this.options[this.selectedIndex].value);">
+				onChange="Exchanger.convert()">
 			<option value="USD" selected>US Dollar</option>
 			<option value="BGN">Bulgarian Lev</option>
 			<option value="CAD">Canadian Dollar</option>
@@ -56,7 +56,7 @@
 		<input type="text" readonly id="output-value">
 		<select name="currency"
 				id="output-currency"
-				onChange="Exchanger.outputCurrencyChange(this.options[this.selectedIndex].value);">
+				onChange="Exchanger.convert()">
 			<option value="USD">US Dollar</option>
 			<option value="BGN">Bulgarian Lev</option>
 			<option value="CAD">Canadian Dollar</option>
