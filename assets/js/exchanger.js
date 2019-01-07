@@ -43,27 +43,14 @@ var Exchanger = {
 		return select.options[select.selectedIndex].value;
 	},
 	getConversionRates: function() {
-		// try to get a new rate if online
-		if(isOnline()) {
-			console.log('ONLINE: Retrieving rates for ' + Exchanger.inputCurrency() + '...');
-			var apiURL = 'https://api.exchangeratesapi.io/latest?base=' + Exchanger.inputCurrency();
-			loadJSON(apiURL, function(data) {
-				Exchanger.Data[Exchanger.inputCurrency()] = data;
-			}, function(xhr) {
-				console.log('Error');
-			});
-		}
-		// user is offline. use cache if available
-		else {
-			console.log('OFFLINE: Attempting to use cached rates...');
-			// check if in cache
-			if(Exchanger.Data[Exchanger.inputCurrency()] != undefined) {
-				console.log('Using cached rate.');
-			} else {
-				console.log('No rate in cache, can\'t convert. :(');
-				document.getElementById('output-value').value = '';
-			}
-		}
+		// if online, get rates
+		var apiURL = 'https://api.exchangeratesapi.io/latest?base=' + Exchanger.inputCurrency();
+		loadJSON(apiURL, function(data) {
+			Exchanger.Data[Exchanger.inputCurrency()] = data;
+		}, function(xhr) {
+			console.log('Error');
+		});
+		// else try to use cached rate
 	},
 	convert: function() {
 		Exchanger.getConversionRates();
@@ -79,7 +66,7 @@ var Exchanger = {
 		}, 500); // allow time to retrive the rates
 	},
 	saveData: function() {
-		// save Data to localStorage
+		// save Data to localStorage for offline use
 	},
 	loadData: function() {
 		// load Data from localStorage
