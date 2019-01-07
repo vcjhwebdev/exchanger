@@ -38,27 +38,30 @@ var Exchanger = {
 		var select = document.getElementById('input-currency');
 		return select.options[select.selectedIndex].value;
 	},
+	inputAmount: function() {
+		var n = Number(document.getElementById('input-value').value);
+		if( n !== undefined ) {
+			return n;
+		}
+		return 0;
+	},
 	outputCurrency: function() {
 		var select = document.getElementById('output-currency');
 		return select.options[select.selectedIndex].value;
 	},
 	getConversionRates: function() {
-		// if online, get rates
 		var apiURL = 'https://api.exchangeratesapi.io/latest?base=' + Exchanger.inputCurrency();
 		loadJSON(apiURL, function(data) {
 			Exchanger.Data[Exchanger.inputCurrency()] = data;
 		}, function(xhr) {
 			console.log('Error');
 		});
-		// else try to use cached rate
 	},
 	convert: function() {
 		Exchanger.getConversionRates();
 		setTimeout(function() {
-			var inputAmount = document.getElementById('input-value').value;
  			try {
-				inputAmount = Number(inputAmount);
-				var outputAmount = inputAmount * Exchanger.Data[Exchanger.inputCurrency()].rates[Exchanger.outputCurrency()];
+				var outputAmount = Exchanger.inputAmount() * Exchanger.Data[Exchanger.inputCurrency()].rates[Exchanger.outputCurrency()];
 				document.getElementById('output-value').value = outputAmount.toFixed(2);
 			} catch(err) {
 				console.log('ERROR: ' + err.message);
