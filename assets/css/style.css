@@ -9,6 +9,7 @@ body{
 }
 
 select{
+	background-color: #E9BDFF; 
 	font-family: fantasy;
 }
 input[type="text"] {
@@ -19,6 +20,7 @@ input[type="text"] {
 input[type="text"], select, label {
 	font-size: 16px;
 }
+
 
 input[readonly] {
 	background-color: #E9BDFF;
