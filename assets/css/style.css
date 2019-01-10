@@ -1,5 +1,19 @@
-body, select, input[type="text"] {
-	font-family: Consolas, "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", Monaco, "Courier New", "monospace";
+body {
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+body{
+	font-family: cursive;
+}
+
+select{
+	font-family: fantasy;
+}
+input[type="text"] {
+	font-family: cursive;
+
 }
 
 input[type="text"], select, label {
@@ -7,7 +21,7 @@ input[type="text"], select, label {
 }
 
 input[readonly] {
-	background-color: rgba(0, 0, 0, 0.2);
+	background-color: #E9BDFF;
 	font-style: italic;
 }
 
